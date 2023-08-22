@@ -45,7 +45,7 @@ You can also override some of the default config variables in the .env for my pl
 
 ```env
 OPENAI_DEFAULT_MODEL=gpt-4-32k
-OPEN_AI_TOKEN_LIMIT=4096
+OPENAI_TOKEN_LIMIT=4096
 ```
 
 ### Examples
