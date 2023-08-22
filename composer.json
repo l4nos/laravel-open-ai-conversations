@@ -1,0 +1,41 @@
+{
+    "name": "lanos/laravel-open-ai-conversations",
+    "description": "Adds persistent conversation functionality to the existing Laravel OpenAI Package",
+	"keywords": ["laravel", "openai", "conversations", "gpt"],
+    "type": "library",
+    "require": {
+        "openai-php/laravel": "^v0.5.1",
+        "guzzlehttp/guzzle": "^7.0.1",
+        "illuminate/console": "^8.37|^9.0",
+        "illuminate/contracts": "^8.37|^9.0",
+        "illuminate/database": "^8.37|^9.0",
+        "laravel/framework": "^8.37|^9.0",
+        "illuminate/http": "^8.37|^9.0",
+        "illuminate/log": "^8.37|^9.0",
+        "illuminate/notifications": "^8.37|^9.0",
+        "illuminate/routing": "^8.37|^9.0",
+        "illuminate/support": "^8.37|^9.0",
+        "illuminate/view": "^8.37|^9.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Robert Lane",
+            "email": "rob@updev.agency"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Lanos\\OpenAiConversations\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+              "OpenAiConversationsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
