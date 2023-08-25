@@ -24,15 +24,18 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
             $model->n_value = config('open_ai_conversations.default_n_value');
             // APPLY DEFAULT MODEL
             $model->model = config('open_ai_conversations.default_model');
+
             // APPLY DEFAULT TOKEN LIMIT
             $maxTokenLimit = Conversation::assertTokenLimit(config('open_ai_conversations.default_model'));
             if(config('open_ai_conversations.default_conversation_token_limit') === 'MAX'){
                 $model->token_limit = $maxTokenLimit;
             }
+
             // IN CASE DEVELOPER TRIES TO CONFIGURE HIGHER TOKEN LIMIT THAN IS ALLOWED
-            if(config('open_ai_conversations.default_conversation_token_limit') > $maxTokenLimit){
+            if(config('open_ai_conversations.default_conversation_token_limit') !== 'MAX' && config('open_ai_conversations.default_conversation_token_limit') > $maxTokenLimit){
                 throw new \Exception('Your token limit is too high for the chosen GPT model');
             }
+
         });
     }
 
