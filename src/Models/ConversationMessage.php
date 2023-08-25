@@ -23,7 +23,7 @@ class ConversationMessage extends \Illuminate\Database\Eloquent\Model
      * This can be compared against the response's token length
      * To have a more precise measurement, build a python microservice that uses the OpenAI Tokenizer library.
      * @param $message
-     * @return array
+     * @return int
      */
     public static function estimateTokenRequestLength($message){
         // Split by whitespace
@@ -40,7 +40,7 @@ class ConversationMessage extends \Illuminate\Database\Eloquent\Model
             }
         }
 
-        return $tokens;
+        return count($tokens);
     }
 
     protected $table = 'open_ai_conversation_messages';
