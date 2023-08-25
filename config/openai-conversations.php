@@ -8,6 +8,14 @@ return [
     'default_n_value' => env('OPENAI_N_VALUE', 1),
     // DEFAULT MODEL OF CHOICE WHEN STARTING A NEW CONVERSATION SESSION
     'default_model' => env('OPENAI_DEFAULT_MODEL', 'gpt-4'),
-    'override_models' => env('OPENAI_MODEL_LIMITS')
+    'override_models' => env('OPENAI_MODEL_LIMITS'),
+    'database' => [
+        'messages' => [
+            'table' => env('OPENAI_MESSAGES_TABLE', 'open_ai_conversation_messages')
+        ],
+        'conversations' => [
+            'table' => env('OPENAI_CONVERSATIONS_TABLE', 'open_ai_conversations')
+        ]
+    ]
 
 ];
