@@ -3,13 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Lanos\OpenAiConversations\Models\Conversation;
 
 /**
  * Creates the Stripe Account columns for the user.
  */
 return new class extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -17,20 +17,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('open_ai_conversation_messages', function (Blueprint $table) {
+        Schema::create(config('open_ai_conversations.database.messages.table'), function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('open_ai_id', 80)->nullable();
             $table->longtext('content');
             $table->unsignedBigInteger('actual_token_length')->default(0);
             $table->unsignedBigInteger('estimated_token_length')->default(0);
-            $table->uuid('conversation_id');
-            $table->boolean('is_from_user')->default(false);
+            $table->foreignUuid('conversation_id')->index()->constrained(config('open_ai_conversations.database.conversations.table'))->cascadeOnDelete();
+            $table->string('role');
             $table->softDeletes();
             $table->timestamps();
-        });
-
-        Schema::table('open_ai_conversation_messages', function (Blueprint $table) {
-            $table->foreign('conversation_id')->references('id')->on('open_ai_conversations');
         });
     }
 
@@ -41,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('open_ai_conversation_messages');
+        Schema::dropIfExists(config('open_ai_conversations.database.messages.table'));
     }
 };
