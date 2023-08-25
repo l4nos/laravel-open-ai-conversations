@@ -62,12 +62,14 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
         }
     }
 
+
     /**
-     * Main public function for asking a question on a conversation
      * @param $content
-     * @return Model|HasMany|object|null
+     * @param $returnQuestion
+     * @return array|Model|HasMany|object|null
+     * @throws Exception
      */
-    public function askQuestion($content){
+    public function askQuestion($content, $returnQuestion = false){
 
         $estimatedTokenLength = ConversationMessage::estimateTokenRequestLength($content);
 
@@ -85,22 +87,30 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
         if(isset($commitRequest['choices'])){
 
             // APPEND THE QUESTION
-            $this->messages()->create([
+            $question = $this->messages()->create([
                 "estimated_token_length" => $estimatedTokenLength,
                 "actual_token_length" => $commitRequest['usage']['prompt_tokens'],
                 "is_from_user" => true,
                 "content" => $content
             ]);
 
-            $this->messages()->create([
+            $answer = $this->messages()->create([
                 "estimated_token_length" => 0,
                 "actual_token_length" => $commitRequest['usage']['completion_tokens'],
                 "is_from_user" => false,
                 "content" => $commitRequest['choices'][0]['message']['content']
             ]);
 
+            if($returnQuestion === false){
+                return $this->messages()->orderBy('id', 'desc')->first();
+            }else{
+                return [
+                    "question" => $question,
+                    "answer" => $this->messages()->orderBy('id', 'desc')->first()
+                ];
+            }
+
             // RETURN THE NEW MESSAGE
-            return $this->messages()->orderBy('id', 'desc')->first();
 
         }else{
             throw new Exception('GPT Request Failed');
