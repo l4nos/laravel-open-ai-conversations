@@ -1,11 +1,11 @@
 <?php
 
 namespace Lanos\OpenAiConversations\Concerns;
+
 use Illuminate\Support\Str;
 
 trait HasOrderedUUID
 {
-
     public function initializeHasOrderedUUID()
     {
         $this->attributes['id'] = Str::orderedUuid();
@@ -26,5 +26,4 @@ trait HasOrderedUUID
     {
         return false;
     }
-
 }
