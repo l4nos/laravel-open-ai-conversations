@@ -4,18 +4,11 @@
 	"keywords": ["laravel", "openai", "conversations", "gpt"],
     "type": "library",
     "require": {
-        "openai-php/laravel": "^v0.5.1",
-        "guzzlehttp/guzzle": "^7.0.1",
-        "illuminate/console": "^8.37|^9.0",
-        "illuminate/contracts": "^8.37|^9.0",
-        "illuminate/database": "^8.37|^9.0",
-        "laravel/framework": "^8.37|^9.0",
-        "illuminate/http": "^8.37|^9.0",
-        "illuminate/log": "^8.37|^9.0",
-        "illuminate/notifications": "^8.37|^9.0",
-        "illuminate/routing": "^8.37|^9.0",
-        "illuminate/support": "^8.37|^9.0",
-        "illuminate/view": "^8.37|^9.0"
+        "openai-php/laravel": "^v0.5.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.1",
+        "orchestra/testbench": "^8.8"
     },
     "license": "MIT",
     "authors": [
@@ -29,6 +22,11 @@
             "Lanos\\OpenAiConversations\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Lanos\\OpenAiConversations\\Tests\\": "tests"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -37,5 +35,16 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "post-autoload-dump": [
+            "@php vendor/bin/testbench package:discover --ansi"
+        ]
+    }
 }
