@@ -71,11 +71,11 @@ class ConversationTest extends TestCase
 
         $this->assertEquals([
             [
-                'role' => $message1->role,
+                'role' => 'user',
                 'content' => $message1->content,
             ],
             [
-                'role' => $message2->role,
+                'role' => 'assistant',
                 'content' => $message2->content,
             ]
         ], $formattedConversation);

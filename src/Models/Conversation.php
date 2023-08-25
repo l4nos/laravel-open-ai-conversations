@@ -157,7 +157,7 @@ class Conversation extends Model
 
         return $messages->map(function ($message) {
             return [
-                'role'    => $message->role,
+                'role'    => $message->role->value,
                 'content' => $message->content
             ];
         })->toArray();
