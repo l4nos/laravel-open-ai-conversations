@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('actual_token_length')->default(0);
             $table->unsignedBigInteger('estimated_token_length')->default(0);
             $table->uuid('conversation_id');
+            $table->boolean('is_from_user')->default(false);
             $table->softDeletes();
             $table->timestamps();
         });
