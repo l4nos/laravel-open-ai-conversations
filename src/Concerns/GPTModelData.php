@@ -2,10 +2,8 @@
 
 namespace Lanos\OpenAiConversations\Concerns;
 
-use Lanos\OpenAiConversations\Models\Conversation;
-
-trait GPTModelData{
-
+trait GPTModelData
+{
     private static $gptModels = [
         "gpt-4" => [
             "token_limit" => 8192,
@@ -45,20 +43,23 @@ trait GPTModelData{
         ]
     ];
 
-    private static function retrieveModels(){
-        if(config('open_ai_conversations.override_models')){
+    private static function retrieveModels()
+    {
+        if (config('open_ai_conversations.override_models')) {
             return config('open_ai_conversations.override_models');
-        }else{
-            return Conversation::$gptModels;
+        } else {
+            return self::$gptModels;
         }
     }
 
-    private static function assertTokenLimit($model){
-        $gptModels = Conversation::retrieveModels();
-        if(!isset($gptModels[$model])){
+    private static function assertTokenLimit($model)
+    {
+        $gptModels = self::retrieveModels();
+
+        if (!isset($gptModels[$model])) {
             throw new \Exception('You have specified an invalid GPT model');
         }
+        
         return $gptModels[$model]['token_limit'];
     }
-
 }
