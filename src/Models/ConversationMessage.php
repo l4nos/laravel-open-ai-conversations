@@ -2,22 +2,39 @@
 
 namespace Lanos\OpenAiConversations\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Lanos\OpenAiConversations\Enums\OpenAiRole;
 use Lanos\OpenAiConversations\Concerns\HasOrderedUUID;
 
-class ConversationMessage extends \Illuminate\Database\Eloquent\Model
+class ConversationMessage extends Model
 {
-
     // IMPORTANT - USE SOFT DELETES TO MAKE MESSAGES NOT APPEND ONCE THEY NEED TO BE FORGOTTEN FOR TOKEN LIMIT REASONS,
     // BUT STILL ALLOW THEM TO BE VIEWABLE BY THE USER
-
     use HasOrderedUUID,
         SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'open_ai_id',
+        'content',
+        'actual_token_length',
+        'estimated_token_length',
+        'role',
+        'conversation_id',
+    ];
 
-    public function conversation(){
-        return $this->belongsTo(Conversation::class);
+    protected $casts = [
+        'role' => OpenAiRole::class
+    ];
+
+    public function getTable()
+    {
+        return config('open_ai_conversations.database.messages.table');
+    }
+
+    public function conversation()
+    {
+        return $this->belongsTo(Conversation::class, );
     }
 
     /**
@@ -27,7 +44,8 @@ class ConversationMessage extends \Illuminate\Database\Eloquent\Model
      * @param $message
      * @return int
      */
-    public static function estimateTokenRequestLength($message){
+    public static function estimateTokenRequestLength($message)
+    {
         // Split by whitespace
         $whitespaceTokens = preg_split('/\s+/', $message);
 
@@ -44,7 +62,4 @@ class ConversationMessage extends \Illuminate\Database\Eloquent\Model
 
         return count($tokens);
     }
-
-    protected $table = 'open_ai_conversation_messages';
-
 }
