@@ -94,6 +94,7 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
                 "content" => $content
             ]);
 
+
             $answer = $this->messages()->create([
                 "estimated_token_length" => 0,
                 "actual_token_length" => $commitRequest['usage']['completion_tokens'],
