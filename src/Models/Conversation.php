@@ -2,20 +2,31 @@
 
 namespace Lanos\OpenAiConversations\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Lanos\OpenAiConversations\Concerns\GPTModelData;
 use Exception;
-use Lanos\OpenAiConversations\Concerns\HasOrderedUUID;
 use OpenAI\Laravel\Facades\OpenAI;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Lanos\OpenAiConversations\Enums\OpenAiRole;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Lanos\OpenAiConversations\Concerns\GPTModelData;
+use Lanos\OpenAiConversations\Concerns\HasOrderedUUID;
 
-class Conversation extends \Illuminate\Database\Eloquent\Model
+class Conversation extends Model
 {
-
     use HasOrderedUUID,
         SoftDeletes,
         GPTModelData;
+
+    protected $fillable = [
+        'model',
+        'n_value',
+        'token_limit',
+    ];
+
+    public function getTable()
+    {
+        return config('open_ai_conversations.database.conversations.table');
+    }
 
     protected static function booted()
     {
@@ -26,20 +37,21 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
             $model->model = config('open_ai_conversations.default_model');
 
             // APPLY DEFAULT TOKEN LIMIT
-            $maxTokenLimit = Conversation::assertTokenLimit(config('open_ai_conversations.default_model'));
-            if(config('open_ai_conversations.default_conversation_token_limit') === 'MAX'){
+            $maxTokenLimit = self::assertTokenLimit(config('open_ai_conversations.default_model'));
+
+            if (config('open_ai_conversations.default_conversation_token_limit') === 'MAX') {
                 $model->token_limit = $maxTokenLimit;
             }
 
             // IN CASE DEVELOPER TRIES TO CONFIGURE HIGHER TOKEN LIMIT THAN IS ALLOWED
-            if(config('open_ai_conversations.default_conversation_token_limit') !== 'MAX' && config('open_ai_conversations.default_conversation_token_limit') > $maxTokenLimit){
+            if (config('open_ai_conversations.default_conversation_token_limit') !== 'MAX' && config('open_ai_conversations.default_conversation_token_limit') > $maxTokenLimit) {
                 throw new \Exception('Your token limit is too high for the chosen GPT model');
             }
-
         });
     }
 
-    public function messages(){
+    public function messages()
+    {
         return $this->hasMany(ConversationMessage::class);
     }
 
@@ -62,15 +74,14 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
         }
     }
 
-
     /**
      * @param $content
      * @param $returnQuestion
      * @return array|Model|HasMany|object|null
      * @throws Exception
      */
-    public function askQuestion($content, $returnQuestion = false){
-
+    public function askQuestion($content, $returnQuestion = false)
+    {
         $estimatedTokenLength = ConversationMessage::estimateTokenRequestLength($content);
 
         // MAKE SURE THERE WILL BE ENOUGH TOKENS AVAILABLE FOR THIS, IF NOT, FORGET SOME MESSAGES
@@ -80,31 +91,31 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
         $payload = $this->prepareMessagePayload($content);
 
         $commitRequest = OpenAI::chat()->create([
-            'model' => $this->model,
+            'model'    => $this->model,
             'messages' => $payload,
         ]);
 
-        if(isset($commitRequest['choices'])){
+        if (isset($commitRequest['choices'])) {
 
             // APPEND THE QUESTION
             $question = $this->messages()->create([
                 "estimated_token_length" => $estimatedTokenLength,
-                "actual_token_length" => $commitRequest['usage']['prompt_tokens'],
-                "is_from_user" => true,
-                "content" => $content
+                "actual_token_length"    => $commitRequest['usage']['prompt_tokens'],
+                'role'                   => OpenAiRole::USER,
+                "content"                => $content
             ]);
 
 
-            $answer = $this->messages()->create([
+            $this->messages()->create([
                 "estimated_token_length" => 0,
-                "actual_token_length" => $commitRequest['usage']['completion_tokens'],
-                "is_from_user" => false,
-                "content" => $commitRequest['choices'][0]['message']['content']
+                "actual_token_length"    => $commitRequest['usage']['completion_tokens'],
+                'role'                   => OpenAiRole::ASSISTANT,
+                "content"                => $commitRequest['choices'][0]['message']['content']
             ]);
 
-            if($returnQuestion === false){
+            if ($returnQuestion === false) {
                 return $this->messages()->orderBy('id', 'desc')->first();
-            }else{
+            } else {
                 return [
                     "question" => $question,
                     "answer" => $this->messages()->orderBy('id', 'desc')->first()
@@ -113,10 +124,9 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
 
             // RETURN THE NEW MESSAGE
 
-        }else{
+        } else {
             throw new Exception('GPT Request Failed');
         }
-
     }
 
 
@@ -125,10 +135,12 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
      * @param $content
      * @return mixed[]
      */
-    private function prepareMessagePayload($content){
+    private function prepareMessagePayload($content)
+    {
         $messages = $this->preparePreviousConversation();
+
         $messages[] = [
-            "role" => "user",
+            "role"    => OpenAiRole::USER,
             "content" => $content
         ];
 
@@ -139,16 +151,15 @@ class Conversation extends \Illuminate\Database\Eloquent\Model
      * Returns a formatted collection of the conversation thus far (without forgotten messages)
      * @return mixed[]
      */
-    private function preparePreviousConversation(){
+    private function preparePreviousConversation()
+    {
         $messages = $this->messages()->orderBy('created_at', 'asc')->get();
+
         return $messages->map(function ($message) {
             return [
-                'role' => $message->is_from_user ? 'user' : 'assistant',
+                'role'    => $message->role,
                 'content' => $message->content
             ];
         })->toArray();
     }
-
-    protected $table = 'open_ai_conversations';
-
 }
