@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Schema;
  */
 return new class extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -17,7 +16,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('open_ai_conversations', function (Blueprint $table) {
+        Schema::create(config('open_ai_conversations.database.conversations.table'), function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('model');
             $table->unsignedBigInteger('n_value')->default(1);
@@ -34,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('open_ai_conversations');
+        Schema::dropIfExists(config('open_ai_conversations.database.conversations.table'));
     }
 };
