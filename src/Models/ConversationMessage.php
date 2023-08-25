@@ -14,6 +14,8 @@ class ConversationMessage extends \Illuminate\Database\Eloquent\Model
     use HasOrderedUUID,
         SoftDeletes;
 
+    protected $guarded = [];
+
     public function conversation(){
         return $this->belongsTo(Conversation::class);
     }
